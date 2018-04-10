@@ -65,12 +65,12 @@ var emailForgetPass = function(req,res,next){
           });
 }
 
-let newPostNotification = function (mail_title,email,post_url){
+let newPostNotification = function (mail_title,email,post_url,body){
     let mailOptions = {
         from:'pcasnotification@gmail.com',
         to: email,
         subject:mail_title,
-        html:"Check out the post "+"<a href='http://"+post_url+"'>here</a>"// todo
+        html:body+"<br></br> <b>Check out the post</b> "+"<a href='http://"+post_url+"'>here</a>"// todo
     }
     transporter.sendMail(mailOptions,function(err,info){
         if(err){

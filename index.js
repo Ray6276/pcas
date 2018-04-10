@@ -1323,47 +1323,59 @@ app.post('/new-post', function(req, resp) {
             if(req.session.sub_role == 'i'){
                 job = "Interpreter"
             }
-            title = "[PCAS] A new"+ job +" is looking for job. Desired Days: [" + req.body.days +　" ],Time [" + req.body.time + "]"
+            title = "[PCAS] A new "+ job +" is looking for job. Desired Days: [" + req.body.days +　" ],  Time [" + req.body.time + "]"
+            body = " A new"+ job +" is looking for job.<br></br> Desired Days: " + req.body.days +　" <br></br>Start Date: "+req.body.starting+" <br></br> Time: " + req.body.time + "<br></br> Details: "+req.body.details
             pool.query("SELECT email FROM users WHERE email_notification = true and is_verified = true and suspended = false and user_id != $1 and sub_role = $2",[req.session.user_id,email_role]
             ,function(err,result){
                 if(err){
                     console.log(err);
                 }else {
                     for(i=0;i<result.rows.length;i++){
-                        mailer.newPostNotification(title,result.rows[i].email,post_url)
+                        mailer.newPostNotification(title,result.rows[i].email,post_url,body)
                     }   
                 }
             })
-            return; 
+            return
         }
         if(req.body.looking_for_interpreter == 'on'){
-             email_role = 'i'
-             title = "[PCAS] A new job post has created by School [ " + req.body.school + " ], Working Time at[ "+req.body.time+" ]"
-             pool.query("SELECT email FROM users WHERE email_notification = true and is_verified = true and suspended = false and user_id != $1 and sub_role = $2",[req.session.user_id,email_role]
-            ,function(err,result){
-                if(err){
-                    console.log(err);
-                }else {
-                    for(i=0;i<result.rows.length;i++){
-                        mailer.newPostNotification(title,result.rows[i].email,post_url)
-                    }   
-                }
-            }) 
-        } 
+            email_role = 'i'
+        }
         if (req.body.looking_for_transcriber == 'on'){
             email_role = 't'
-            title = "[PCAS] A new job post has created by School [ " + req.body.school + " ], Working Time at[ "+req.body.time+" ]"
-            pool.query("SELECT email FROM users WHERE email_notification = true and is_verified = true and suspended = false and user_id != $1 and sub_role = $2",[req.session.user_id,email_role]
+        }
+        if(req.body.looking_for_interpreter =='on' && req.body.looking_for_transcriber == 'on'){
+            console.log('test')
+            title = "[PCAS] A new job post has created by School [ " + req.body.school + " ],Start Date["+req.body.when+"], Working Time at[ "+req.body.time+" ]"
+            body = "A new job post has created by School:  " + req.body.school + "<br></br>Start Date: "+ req.body.when+" <br></br> Working Time:  "+req.body.time+" <br></br>Job Details:  "+req.body.details
+            pool.query("SELECT email FROM users WHERE email_notification = true and is_verified = true and suspended = false and user_id != $1 and sub_role != 'a' and sub_role !='c'",[req.session.user_id]
             ,function(err,result){
                 if(err){
                     console.log(err);
                 }else {
                     for(i=0;i<result.rows.length;i++){
-                        mailer.newPostNotification(title,result.rows[i].email,post_url)
+                        mailer.newPostNotification(title,result.rows[i].email,post_url,body)
                     }   
                 }
-            }) 
-        } 
+            })
+            return
+        }
+        title = "[PCAS] A new job post has created by School [ " + req.body.school + " ],Start Date["+req.body.when+"], Working Time at[ "+req.body.time+" ]"
+        body = "A new job post has created by School:  " + req.body.school + "<br></br>Start Date: "+ req.body.when+" <br></br> Working Time:  "+req.body.time+" <br></br>Job Details:  "+req.body.details
+        pool.query("SELECT email FROM users WHERE email_notification = true and is_verified = true and suspended = false and user_id != $1 and (sub_role = $2 or sub_role='ti')",[req.session.user_id,email_role]
+        ,function(err,result){
+            if(err){
+                console.log(err);
+            }else {
+                for(i=0;i<result.rows.length;i++){
+                    mailer.newPostNotification(title,result.rows[i].email,post_url,body)
+                }   
+            }
+        })
+        
+
+        
+
+
 
        
     }
